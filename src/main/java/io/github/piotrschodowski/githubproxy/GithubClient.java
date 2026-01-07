@@ -29,7 +29,7 @@ class GithubClient {
                     .retrieve()
                     .body(GithubRepo[].class);
 
-            return repos != null ? Arrays.asList(repos) : List.of();  // generyki?
+            return toListOrEmpty(repos);
         } catch (RestClientResponseException ex) {
             throw handleClientError(ex, username);
         }
@@ -41,7 +41,7 @@ class GithubClient {
                 .retrieve()
                 .body(GithubBranch[].class);
 
-        return branches != null ? Arrays.asList(branches) : List.of();  // generyki?
+        return toListOrEmpty(branches);
     }
 
     private static RestClient buildGithubRestClient(final String baseUrl) {
@@ -56,5 +56,9 @@ class GithubClient {
             return new GithubUserNotFoundException(username);
         }
         return ex;
+    }
+
+    private static <T> List<T> toListOrEmpty(T[] array) {
+        return array != null ? Arrays.asList(array) : List.of();
     }
 }
