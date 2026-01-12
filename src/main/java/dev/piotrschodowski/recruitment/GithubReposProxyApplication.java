@@ -1,0 +1,12 @@
+package dev.piotrschodowski.recruitment;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class GithubReposProxyApplication {
+
+    static void main(String[] args) {
+        SpringApplication.run(GithubReposProxyApplication.class, args);
+    }
+}

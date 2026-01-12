@@ -1,4 +1,4 @@
-package io.github.piotrschodowski.githubproxy;
+package dev.piotrschodowski.recruitment;
 
 record ErrorResponse(
         int status,

@@ -1,8 +1,8 @@
-package io.github.piotrschodowski.githubproxy;
+package dev.piotrschodowski.recruitment;
 
 import java.util.List;
 
-record RepositoryResponse(
+public record RepositoryResponse(
         String repositoryName,
         String ownerLogin,
         List<BranchResponse> branches

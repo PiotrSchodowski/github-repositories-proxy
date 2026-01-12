@@ -1,4 +1,4 @@
-package io.github.piotrschodowski.githubproxy;
+package dev.piotrschodowski.recruitment;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class GithubControllerIT {
+class GithubControllerIntegrationTest {
 
     private static final String EXISTING_USER = "octocat";
     private static final String MISSING_USER = "not-existing-user";
@@ -30,7 +30,7 @@ class GithubControllerIT {
     private static final String FORK_REPO = "forked-repo";
 
     @LocalServerPort
-    int port;
+    private int port;
 
     private RestClient appClient;
 
