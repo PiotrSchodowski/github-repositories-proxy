@@ -19,10 +19,17 @@ for a given GitHub user, along with their branches and last commit SHA.
 ## How to run the application
 
 ### Prerequisites
-- Java 25+
+- **JDK 25**
 
-### Run locally
+### Run the application
 
+#### Windows
+
+```bash
+.\mvnw.cmd spring-boot:run
+```
+
+#### Linux
 ```bash
 ./mvnw spring-boot:run
 ```
