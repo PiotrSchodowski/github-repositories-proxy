@@ -1,9 +1,9 @@
 package dev.piotrschodowski.recruitment;
 
-record GithubRepo(
+public record GithubRepo(
         String name,
         Owner owner,
         boolean fork
 ) {
-    record Owner(String login) {}
+    public record Owner(String login) {}
 }

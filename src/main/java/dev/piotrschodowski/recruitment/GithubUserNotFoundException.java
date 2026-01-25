@@ -1,8 +1,7 @@
 package dev.piotrschodowski.recruitment;
 
-class GithubUserNotFoundException extends RuntimeException {
-
-    GithubUserNotFoundException(String username) {
+final class GithubUserNotFoundException extends RuntimeException {
+    GithubUserNotFoundException(final String username) {
         super("GitHub user '%s' not found".formatted(username));
     }
 }

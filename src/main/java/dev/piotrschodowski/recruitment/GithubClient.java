@@ -1,54 +1,43 @@
+// src/main/java/dev/piotrschodowski/recruitment/GithubClient.java
 package dev.piotrschodowski.recruitment;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Component
-class GithubClient {
+final class GithubClient {
 
-    private static final String USERS_REPOS_PATH = "/users/{username}/repos";
-    private static final String REPO_BRANCHES_PATH = "/repos/{owner}/{repo}/branches";
+    private final GithubHttpApi githubHttpApi;
 
-    private final RestClient restClient;
-
-    GithubClient(@Value("${github.api.base-url}") final String githubApiBaseUrl) {
-        this.restClient = buildGithubRestClient(githubApiBaseUrl);
+    GithubClient(final GithubHttpApi githubHttpApi) {
+        this.githubHttpApi = githubHttpApi;
     }
 
     List<GithubRepo> fetchUserRepositories(final String username) {
         try {
-            GithubRepo[] repos = restClient.get()
-                    .uri(USERS_REPOS_PATH, username)
-                    .retrieve()
-                    .body(GithubRepo[].class);
+            final var repos = Objects.requireNonNull(
+                    githubHttpApi.userRepos(username),
+                    "GitHub returned null body for repositories"
+            );
 
-            return toListOrEmpty(repos);
+            return Arrays.stream(repos).toList();
         } catch (RestClientResponseException ex) {
             throw handleClientError(ex, username);
         }
     }
 
     List<GithubBranch> fetchRepositoryBranches(final String ownerLogin, final String repositoryName) {
-        GithubBranch[] branches = restClient.get()
-                .uri(REPO_BRANCHES_PATH, ownerLogin, repositoryName)
-                .retrieve()
-                .body(GithubBranch[].class);
+        final var branches = Objects.requireNonNull(
+                githubHttpApi.repoBranches(ownerLogin, repositoryName),
+                "GitHub returned null body for branches"
+        );
 
-        return toListOrEmpty(branches);
-    }
-
-    private static RestClient buildGithubRestClient(final String baseUrl) {
-        return RestClient.builder()
-                .baseUrl(baseUrl)
-                .defaultHeader("Accept", MediaType.APPLICATION_JSON_VALUE)
-                .build();
+        return Arrays.stream(branches).toList();
     }
 
     private static RuntimeException handleClientError(final RestClientResponseException ex, final String username) {
@@ -56,9 +45,5 @@ class GithubClient {
             return new GithubUserNotFoundException(username);
         }
         return ex;
-    }
-
-    private static <T> List<T> toListOrEmpty(T[] array) {
-        return array != null ? Arrays.asList(array) : List.of();
     }
 }

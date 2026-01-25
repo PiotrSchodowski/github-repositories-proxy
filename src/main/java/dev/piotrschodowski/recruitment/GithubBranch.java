@@ -1,9 +1,9 @@
 package dev.piotrschodowski.recruitment;
 
-record GithubBranch(
+public record GithubBranch(
         String name,
         Commit commit
 ) {
-    record Commit(String sha) {
+    public record Commit(String sha) {
     }
 }

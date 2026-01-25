@@ -10,7 +10,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(GithubUserNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleGithubUserNotFound(final GithubUserNotFoundException ex) {
-        final ErrorResponse body = new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+        final var body = new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 }

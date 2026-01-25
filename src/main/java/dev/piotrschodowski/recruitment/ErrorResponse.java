@@ -1,6 +1,6 @@
 package dev.piotrschodowski.recruitment;
 
-record ErrorResponse(
+public record ErrorResponse(
         int status,
         String message
 ) {

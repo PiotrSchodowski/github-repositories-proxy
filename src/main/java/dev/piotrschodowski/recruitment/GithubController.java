@@ -13,12 +13,18 @@ public class GithubController {
 
     private final GithubService githubService;
 
-    public GithubController(final GithubService githubService) {
+    GithubController(final GithubService githubService) {
         this.githubService = githubService;
     }
 
     @GetMapping(USER_REPOSITORIES_ENDPOINT)
     public List<RepositoryResponse> listUserNonForkRepositories(@PathVariable final String username) {
         return githubService.getUserRepositoriesWithBranches(username);
+    }
+
+    @GetMapping(value = USER_REPOSITORIES_ENDPOINT, version = "2.0")
+    public RepositoriesResponseV2 listUserNonForkRepositoriesV2(@PathVariable final String username) {
+        final var repos = githubService.getUserRepositoriesWithBranches(username);
+        return new RepositoriesResponseV2(repos.size(), repos);
     }
 }

@@ -3,9 +3,10 @@ package dev.piotrschodowski.recruitment;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.StructuredTaskScope;
 
 @Service
-class GithubService {
+final class GithubService {
 
     private final GithubClient githubClient;
 
@@ -14,41 +15,44 @@ class GithubService {
     }
 
     List<RepositoryResponse> getUserRepositoriesWithBranches(final String username) {
-        return githubClient.fetchUserRepositories(username).stream()
-                .filter(this::isNotFork)
-                .map(this::mapToRepositoryResponse)
+        final var nonForkRepos = githubClient.fetchUserRepositories(username).stream()
+                .filter(repo -> !repo.fork())
                 .toList();
-    }
 
-    private boolean isNotFork(final GithubRepo repository) {
-        return !repository.fork();
+        if (nonForkRepos.isEmpty()) {
+            return List.of();
+        }
+
+        try (var scope = StructuredTaskScope.open(
+                StructuredTaskScope.Joiner.<RepositoryResponse>allSuccessfulOrThrow()
+        )) {
+            final var tasks = nonForkRepos.stream()
+                    .map(repo -> scope.fork(() -> mapToRepositoryResponse(repo)))
+                    .toList();
+
+            scope.join();
+
+            return tasks.stream()
+                    .map(StructuredTaskScope.Subtask::get)
+                    .toList();
+
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Interrupted while fetching branches from GitHub", e);
+        }
     }
 
     private RepositoryResponse mapToRepositoryResponse(final GithubRepo repository) {
-        final String ownerLogin = repository.owner().login();
-        final List<BranchResponse> branches =
-                fetchRepositoryBranches(ownerLogin, repository.name());
+        final var ownerLogin = repository.owner().login();
 
-        return new RepositoryResponse(
-                repository.name(),
-                ownerLogin,
-                branches
-        );
-    }
-
-    private List<BranchResponse> fetchRepositoryBranches(
-            final String ownerLogin,
-            final String repositoryName
-    ) {
-        return githubClient.fetchRepositoryBranches(ownerLogin, repositoryName).stream()
+        final var branches = githubClient.fetchRepositoryBranches(ownerLogin, repository.name()).stream()
                 .map(this::mapToBranchResponse)
                 .toList();
+
+        return new RepositoryResponse(repository.name(), ownerLogin, branches);
     }
 
     private BranchResponse mapToBranchResponse(final GithubBranch branch) {
-        return new BranchResponse(
-                branch.name(),
-                branch.commit().sha()
-        );
+        return new BranchResponse(branch.name(), branch.commit().sha());
     }
 }
